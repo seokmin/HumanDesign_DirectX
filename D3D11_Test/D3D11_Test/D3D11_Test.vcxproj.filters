@@ -103,5 +103,8 @@
     <FxCompile Include="FX\color.fx">
       <Filter>FX</Filter>
     </FxCompile>
+    <FxCompile Include="MyShader.fx">
+      <Filter>FX</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
