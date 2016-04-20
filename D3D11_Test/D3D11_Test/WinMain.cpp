@@ -226,8 +226,8 @@ HRESULT CreateVertexBufferAndIndexBuffer()
 	{
 		{XMFLOAT3(0.7f,0.7f,1.f),(const float*)&Colors::Red},	//0
 		{XMFLOAT3(0.7f,-0.7f,1.f),(const float*)&Colors::Blue },	//1
-		{XMFLOAT3(-0.7f,-0.7f,1.f),(const float*)&Colors::Red },//2
-		{ XMFLOAT3(-0.7f,0.7f,1.f),(const float*)&Colors::Blue },//3
+		{XMFLOAT3(-0.7f,-0.7f,1.f),(const float*)&Colors::Green },//2
+		{ XMFLOAT3(-0.7f,0.7f,1.f),(const float*)&Colors::White },//3
 	};
 	UINT indices[] =
 	{
