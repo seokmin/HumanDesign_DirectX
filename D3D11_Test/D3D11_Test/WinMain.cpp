@@ -142,7 +142,7 @@ void Render()
 		//set shader and draw
 		g_pImmediateContext->VSSetShader(g_pVertexShader, nullptr, 0);
 		g_pImmediateContext->PSSetShader(g_pPixelShader, nullptr, 0);
-		g_pImmediateContext->DrawIndexed(4, 0, 0);
+		g_pImmediateContext->DrawIndexed(6, 0, 0);
 	}
 
 
@@ -232,7 +232,7 @@ HRESULT CreateVertexBufferAndIndexBuffer()
 	UINT indices[] =
 	{
 		0,1,2,
-		1,2,3
+		2,3,0
 	};
 	g_nIndex = size(indices);
 

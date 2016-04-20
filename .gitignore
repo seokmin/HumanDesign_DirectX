@@ -3,3 +3,10 @@
 D3D11_Test/D3D11_Test.VC.VC.opendb
 *.db
 *.suo
+D3D11_Test/D3D11_Test/D3D11_Test.vcxproj
+*.obj
+*.log
+*.lastbuildstate
+*.exe
+*.ilk
+*.pdb
