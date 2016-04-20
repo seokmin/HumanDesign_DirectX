@@ -4,8 +4,8 @@ D3D11_Test/D3D11_Test.VC.VC.opendb
 *.db
 *.suo
 D3D11_Test/D3D11_Test/D3D11_Test.vcxproj
-D3D11_Test/Debug
-D3D11_Test/D3D11_Test/Debug
+D3D11_Test/Debug/
+D3D11_Test/D3D11_Test/Debug/
 *.obj
 *.log
 *.lastbuildstate

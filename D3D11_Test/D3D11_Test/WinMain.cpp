@@ -193,7 +193,7 @@ HRESULT CreateShader()
 	D3D11_INPUT_ELEMENT_DESC	layout[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};//D3D!!_INPUT_ELEMENT_DESC : Semantic, Semantic Index, 자료형태, 사용할 슬롯(0~15), AlignedByteOffset(D3D11_APPEND_ALIGNED_ELEMENT 사용시 자동 계산,입력 분류(정점당,인스턴스당), 성분별 반복 렌더 개수
 	UINT numElements = ARRAYSIZE(layout);
 	hr = g_pd3dDevice->CreateInputLayout(layout, numElements,//성분
