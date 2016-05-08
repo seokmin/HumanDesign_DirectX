@@ -93,4 +93,4 @@ c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathconvert.
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathvector.inl(1269): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathmisc.inl(518): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathmisc.inl(519): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-  D3D11_Test.vcxproj -> C:\Users\Sorae\Documents\GitHub\HumanDesign_DirectX\D3D11_Test\Debug\D3D11_Test.exe
+  D3D11_Test.vcxproj -> D:\DATA\Work\GitHubProjects\HumanDesign_DirectX\D3D11_Test\Debug\D3D11_Test.exe

@@ -21,6 +21,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BoxDemo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Sample\Common\Camera.cpp">
       <Filter>Common</Filter>
     </ClCompile>
@@ -28,6 +34,9 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Sample\Common\d3dUtil.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Sample\Common\dxerr.cpp">
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Sample\Common\GameTimer.cpp">
@@ -51,15 +60,17 @@
     <ClCompile Include="..\..\Sample\Common\xnacollision.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="BoxDemo.cpp">
+    <ClCompile Include="MyTime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Sample\Common\dxerr.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="WinMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="FX\color.fx">
+      <Filter>FX</Filter>
+    </FxCompile>
+    <FxCompile Include="MyShader.fx">
+      <Filter>FX</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Sample\Common\Camera.h">
@@ -72,6 +83,12 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Sample\Common\d3dx11effect.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Sample\Common\d3dxGlobal.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Sample\Common\dxerr.h">
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Sample\Common\GameTimer.h">
@@ -95,16 +112,8 @@
     <ClInclude Include="..\..\Sample\Common\xnacollision.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Sample\Common\dxerr.h">
-      <Filter>Common</Filter>
+    <ClInclude Include="MyTime.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="FX\color.fx">
-      <Filter>FX</Filter>
-    </FxCompile>
-    <FxCompile Include="MyShader.fx">
-      <Filter>FX</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>

@@ -9,3 +9,4 @@ D3D11_Test/D3D11_Test/Debug/
 *.obj
 *.log
 *.lastbuildstate
+*/Debug/*

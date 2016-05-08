@@ -31,6 +31,7 @@
     <ClCompile Include="..\..\Sample\Common\Waves.cpp" />
     <ClCompile Include="..\..\Sample\Common\xnacollision.cpp" />
     <ClCompile Include="BoxDemo.cpp" />
+    <ClCompile Include="MyTime.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -50,6 +51,7 @@
     <ClInclude Include="..\..\Sample\Common\d3dApp.h" />
     <ClInclude Include="..\..\Sample\Common\d3dUtil.h" />
     <ClInclude Include="..\..\Sample\Common\d3dx11effect.h" />
+    <ClInclude Include="..\..\Sample\Common\d3dxGlobal.h" />
     <ClInclude Include="..\..\Sample\Common\dxerr.h" />
     <ClInclude Include="..\..\Sample\Common\GameTimer.h" />
     <ClInclude Include="..\..\Sample\Common\GeometryGenerator.h" />
@@ -58,6 +60,7 @@
     <ClInclude Include="..\..\Sample\Common\TextureMgr.h" />
     <ClInclude Include="..\..\Sample\Common\Waves.h" />
     <ClInclude Include="..\..\Sample\Common\xnacollision.h" />
+    <ClInclude Include="MyTime.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D34B72AE-A6F0-4974-B96A-421BBCC6DF26}</ProjectGuid>
@@ -112,9 +115,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <ExecutablePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>C:\Users\Sorae\Documents\GitHub\HumanDesign_DirectX\Sample\Common;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Sorae\Documents\GitHub\HumanDesign_DirectX\Sample\Common;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(DXSDK_DIR)\Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
+    <IncludePath>$(SolutionDir)\..\Sample\Common;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\..\Sample\Common;$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
