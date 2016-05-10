@@ -59,7 +59,8 @@ ID3D11Buffer*			g_pConstantBuffer = nullptr;
 ID3D11Texture2D*			g_pDepthStencil = nullptr;
 ID3D11DepthStencilView*		g_pDepthStencilView = nullptr;
 
-ID3D11ShaderResourceView*	g_pTextureRV = nullptr;
+ID3D11ShaderResourceView*	g_pTextureRV_box = nullptr;
+ID3D11ShaderResourceView*	g_pTextureRV_heightMap = nullptr;
 ID3D11SamplerState*			g_pSamplerLinear = nullptr;
 
 #define FAIL_CHECK(_hr_)\
@@ -67,6 +68,81 @@ if(FAILED(_hr_)) return _hr_
 
 ID3D11RasterizerState *		g_pSolidRS;
 ID3D11RasterizerState *		g_pWireFrameRS;
+
+int vertexCount = 100;
+int numVertices = 10000;
+ID3D11Buffer* g_pHeightMapVertexBuffer = nullptr;
+int indexSize = 0;
+ID3D11Buffer* g_pHeightMapIndexBuffer = nullptr;
+
+MyVertex *heightmapVertex = nullptr;
+void CreateHeightMapVB()
+{
+
+	heightmapVertex = new MyVertex[numVertices];
+	for (int z = 0; z < vertexCount; ++z)
+	{
+		for (int x = 0; x < vertexCount; ++x)
+		{
+			int idx = x + (z*vertexCount);
+			heightmapVertex[idx].pos = XMFLOAT3(x, 0.f, z);
+			heightmapVertex[idx].color = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+			heightmapVertex[idx].tex = XMFLOAT2(x / (float)(vertexCount - 1), z / (float)(vertexCount - 1));
+		}
+	}
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.ByteWidth = sizeof(MyVertex) * numVertices;
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	D3D11_SUBRESOURCE_DATA initData;
+	ZeroMemory(&initData, sizeof(initData));
+	initData.pSysMem = heightmapVertex;
+	auto hr = g_pd3dDevice->CreateBuffer(&bd, &initData, &g_pHeightMapVertexBuffer);
+	if (hr != S_OK)
+	{
+		Beep(1000, 1000);
+	}
+
+}
+
+void CreateHeightMapIB()
+{
+	int triangleCount = (vertexCount - 1)*(vertexCount - 1) * 2;//왜지?
+	indexSize = triangleCount * 3;
+	UINT* indices = new UINT[indexSize];
+
+	int baseIndex = 0;
+	int numVersPerRow = vertexCount;
+	for (int z = 0; z < numVersPerRow - 1; ++z)
+	{
+		for (int x = 0; x < numVersPerRow - 1; ++x)
+		{
+			indices[baseIndex] = z*numVersPerRow + x;//0
+			indices[baseIndex + 2] = z*numVersPerRow + x + 1;//3
+			indices[baseIndex + 1] = (z + 1)*numVersPerRow + x;//1
+			indices[baseIndex + 3] = (z + 1) * numVersPerRow + x;   // 3
+			indices[baseIndex + 5] = z   * numVersPerRow + x + 1;    //  4
+			indices[baseIndex + 4] = (z + 1) * numVersPerRow + x + 1;   // 1
+
+			baseIndex += 6;
+		}
+	}
+
+	D3D11_BUFFER_DESC ibd;
+	ZeroMemory(&ibd, sizeof(ibd));
+	ibd.ByteWidth = sizeof(UINT) * indexSize;
+	ibd.Usage = D3D11_USAGE_DEFAULT;
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA iInitData;
+	ZeroMemory(&iInitData, sizeof(iInitData));
+	iInitData.pSysMem = indices;
+	g_pd3dDevice->CreateBuffer(&ibd, &iInitData, &g_pHeightMapIndexBuffer);
+}
 
 void CreateRenderState1()
 {
@@ -89,15 +165,15 @@ void CreateRenderState2()
 	g_pd3dDevice->CreateRasterizerState(&rasterizerDesc, &g_pWireFrameRS);
 }
 
-HRESULT   LoadTexture()
+HRESULT   LoadTexture(ID3D11ShaderResourceView** textureRV, std::wstring filename )
 {
-	
+
 	HRESULT hr = D3DX11CreateShaderResourceViewFromFile(
 		g_pd3dDevice,
-		L"Textures/images.jpg",
+		filename.c_str(),
 		nullptr,
 		nullptr,
-		&g_pTextureRV,
+		textureRV,
 		nullptr
 	);
 	FAIL_CHECK(hr);
@@ -205,6 +281,42 @@ HRESULT InitDevice()
 	return hr;
 }
 
+void CalCulateMatrixForHeightMap(float dt)
+{
+	XMMATRIX mat = XMMatrixRotationY(0.0f);
+	g_World = mat;
+
+	XMMATRIX wvp = g_World * g_View * g_Projection;
+
+	ConstantBuffer cb;
+	cb.wvp = XMMatrixTranspose(wvp);
+	cb.world = XMMatrixTranspose(g_World);
+	cb.lightDir = lightDirection;
+	cb.lightColor = lightColor;
+
+	g_pImmediateContext->UpdateSubresource(g_pConstantBuffer, 0, 0, &cb, 0, 0); // update data
+	g_pImmediateContext->VSSetConstantBuffers(0, 1, &g_pConstantBuffer);// set constant buffer.
+	g_pImmediateContext->PSSetConstantBuffers(0, 1, &g_pConstantBuffer);
+}
+
+void CaculateAndRewriteVertexForHeightMap(float dt)
+{
+	for (int z = 0; z < vertexCount; ++z)
+	{
+		for (int x = 0; x < vertexCount; ++x)
+		{
+			int idx = x + (z*vertexCount);
+			heightmapVertex[idx].pos = XMFLOAT3(x, sin(dt*10 - x*z) * sin(x) * sin(z), z);
+		}
+	}
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	ZeroMemory(&mappedResource, sizeof(mappedResource));
+	g_pImmediateContext->Map(g_pHeightMapVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, heightmapVertex, sizeof(MyVertex) * numVertices);
+	g_pImmediateContext->Unmap(g_pHeightMapVertexBuffer, 0);
+}
+
 void Render(float dt)
 {
 	//just clear the backbuffer
@@ -229,16 +341,23 @@ void Render(float dt)
 		g_pImmediateContext->PSSetShader(g_pPixelShader, nullptr, 0);
 
 		//texture settings
-		g_pImmediateContext->PSSetShaderResources(0, 1, &g_pTextureRV);
+		g_pImmediateContext->PSSetShaderResources(0, 1, &g_pTextureRV_box);
 		g_pImmediateContext->PSSetSamplers(0, 1, &g_pSamplerLinear);
 
 		g_pImmediateContext->RSSetState(g_pSolidRS);
 		CalculateMatrixForBox(dt);
 		g_pImmediateContext->DrawIndexed(36, 0, 0);
-		
+
 		//g_pImmediateContext->RSSetState(g_pWireFrameRS);
 		CalculateMatrixForBox2(dt);
 		g_pImmediateContext->DrawIndexed(36, 0, 0);
+
+		g_pImmediateContext->PSSetShaderResources(0, 1, &g_pTextureRV_heightMap);
+		g_pImmediateContext->IASetVertexBuffers(0, 1, &g_pHeightMapVertexBuffer, &stride, &offset);
+		g_pImmediateContext->IASetIndexBuffer(g_pHeightMapIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		CalCulateMatrixForHeightMap(dt);
+		CaculateAndRewriteVertexForHeightMap(dt);
+		g_pImmediateContext->DrawIndexed(indexSize, 0, 0);
 	}
 
 
@@ -259,7 +378,10 @@ void CleanupDevice()
 	CHECK_AND_RELEASE(g_pDepthStencil);
 	CHECK_AND_RELEASE(g_pSolidRS);
 	CHECK_AND_RELEASE(g_pSamplerLinear);
-	CHECK_AND_RELEASE(g_pTextureRV);
+	CHECK_AND_RELEASE(g_pTextureRV_box);
+	CHECK_AND_RELEASE(g_pTextureRV_heightMap);
+	CHECK_AND_RELEASE(g_pHeightMapIndexBuffer);
+	CHECK_AND_RELEASE(g_pHeightMapVertexBuffer);
 	if (g_pImmediateContext)
 		g_pImmediateContext->ClearState();
 	if (g_pRenderTargetView)
@@ -334,7 +456,7 @@ HRESULT CreateShader()
 		&g_pVertexLayout);
 	pVSBlob->Release();
 	FAIL_CHECK(hr);
-	
+
 
 	//픽셀 쉐이더 컴파일 후 생성
 	ID3DBlob *pPSBlob = nullptr;
@@ -354,18 +476,18 @@ HRESULT CreateShader()
 //정점 버퍼 생성
 HRESULT CreateVertexBufferAndIndexBuffer()
 {
-// 	MyVertex vertices[] = 
-// 	{
-// 		{XMFLOAT3(0.7f,0.7f,1.f),(const float*)&Colors::Red},	//0
-// 		{XMFLOAT3(0.7f,-0.7f,1.f),(const float*)&Colors::Blue },	//1
-// 		{XMFLOAT3(-0.7f,-0.7f,1.f),(const float*)&Colors::Green },//2
-// 		{ XMFLOAT3(-0.7f,0.7f,1.f),(const float*)&Colors::White },//3
-// 	};
-// 	UINT indices[] =
-// 	{
-// 		0,1,2,
-// 		2,3,0
-// 	};
+	// 	MyVertex vertices[] = 
+	// 	{
+	// 		{XMFLOAT3(0.7f,0.7f,1.f),(const float*)&Colors::Red},	//0
+	// 		{XMFLOAT3(0.7f,-0.7f,1.f),(const float*)&Colors::Blue },	//1
+	// 		{XMFLOAT3(-0.7f,-0.7f,1.f),(const float*)&Colors::Green },//2
+	// 		{ XMFLOAT3(-0.7f,0.7f,1.f),(const float*)&Colors::White },//3
+	// 	};
+	// 	UINT indices[] =
+	// 	{
+	// 		0,1,2,
+	// 		2,3,0
+	// 	};
 	MyVertex vertices[] =
 	{
 		{ XMFLOAT3(-1.0f, 1.0f, -1.0f),  XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT3(-0.33f, 0.33f, -0.33f) , XMFLOAT2(1.0f, 1.0f) },
@@ -420,7 +542,7 @@ HRESULT CreateVertexBufferAndIndexBuffer()
 	bd.MiscFlags = 0;
 	bd.StructureByteStride = 0;
 
-	ZeroMemory(&initData,sizeof(initData));
+	ZeroMemory(&initData, sizeof(initData));
 	initData.pSysMem = indices;
 	hr = g_pd3dDevice->CreateBuffer(&bd,
 		&initData,
@@ -483,18 +605,18 @@ void CalculateMatrixForBox2(float dt)
 
 HRESULT InitMatrix()
 {
-	
+
 
 	g_World = XMMatrixIdentity();
 
-	XMVECTOR pos = XMVectorSet(0.f, 0.f, -5.f, 1.f);
-	XMVECTOR target = XMVectorSet(0.f, 0.f, 1.f, 0.f);
+	XMVECTOR pos = XMVectorSet(-20.f, 45.f, 10.f, 1.f);
+	XMVECTOR target = XMVectorSet(50.f, 0.f, 50.f, 0.f);
 	XMVECTOR up = XMVectorSet(0.f, 1.f, 0.f, 0.f);
 	g_View = XMMatrixLookAtLH(pos, target, up);
 
 	g_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV2,
-		800.f / (FLOAT)600.f,
-		0.01f, 100.f);
+		800.f / (FLOAT)600.f,//ratio
+		0.01f, 1000.f);//near, far
 	return S_OK;
 
 }
@@ -556,14 +678,19 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	CreateRenderState1();
 	CreateRenderState2();
 
-	LoadTexture();
+	LoadTexture(&g_pTextureRV_heightMap, L"Textures/heightMap.jpg");
+	LoadTexture(&g_pTextureRV_box, L"Textures/images.jpg");
 	InitMatrix();
-
+	CreateHeightMapVB();
+	CreateHeightMapIB();
 	CMyTime::GetInstance()->Init();
 	MSG			msg;
 	while (true)
 	{
 		CMyTime::GetInstance()->ProcessTime();
+		static float dt = 0;
+		dt += CMyTime::GetInstance()->GetElapsedTime();
+		
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
@@ -574,10 +701,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		}
 		else
 		{
-			static float deltaTime = 0;
-			deltaTime += CMyTime::GetInstance()->GetElapsedTime();		// GetDeltaTime이 없으면 0.00005f등의 작은수를 쓸 것.
+			static float elapsedTime = 0;
+			elapsedTime += CMyTime::GetInstance()->GetElapsedTime();		// GetDeltaTime이 없으면 0.00005f등의 작은수를 쓸 것.
 
-			Render(deltaTime);
+			Render(elapsedTime);
 		}
 	}
 	CleanupDevice();
