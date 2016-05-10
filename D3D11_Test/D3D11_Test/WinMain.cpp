@@ -306,7 +306,7 @@ void CaculateAndRewriteVertexForHeightMap(float dt)
 		for (int x = 0; x < vertexCount; ++x)
 		{
 			int idx = x + (z*vertexCount);
-			heightmapVertex[idx].pos = XMFLOAT3(x, sin(dt*10 - x*z) * sin(x) * sin(z), z);
+			heightmapVertex[idx].pos = XMFLOAT3(x*2-25, sin(dt*10 - x*z) * sin(x) * sin(z), z*2-25);
 		}
 	}
 
